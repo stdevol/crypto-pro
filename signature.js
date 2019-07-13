@@ -1,16 +1,7 @@
 ﻿import 'cadesplugin'
 /* globals cadesplugin */
 import api from './signature-async.js'
-
-export async function getSignedXml(thumbprint, dataToSign) {
-  try {
-    await cadesplugin
-    return await api.getSignedXml(thumbprint, dataToSign)
-  } catch (error) {
-    console.error(error)
-    throw error
-  }
-}
+import { partialRead } from './read-file.js'
 
 export async function getDataSignature(thumbprint, dataToSign) {
   try {
@@ -22,20 +13,10 @@ export async function getDataSignature(thumbprint, dataToSign) {
   }
 }
 
-export async function getDataSignatureByHash(thumbprint, hash) {
+export async function getDataSignatureByHashes(thumbprint, multipleHash) {
   try {
     await cadesplugin
-    return await api.getDataSignatureByHash(thumbprint, hash)
-  } catch (error) {
-    console.error(error)
-    throw error
-  }
-}
-
-export async function verifyXmlSignature(signedData) {
-  try {
-    await cadesplugin
-    return await api.verifyXmlSignature(signedData)
+    return await api.getDataSignatureByHashes(thumbprint, multipleHash)
   } catch (error) {
     console.error(error)
     throw error
@@ -67,13 +48,31 @@ export async function checkCadesPlugin() {
   }
 }
 
-export async function makeHash(dataToHash) {
+export async function makeHashes(dataToHash) {
   try {
     await cadesplugin
-    const res = await api.makeHash(dataToHash)
-    return res.Value
+    return await api.makeHashes(dataToHash)
   } catch (error) {
     console.error(error)
-    return null
+    throw error
+  }
+}
+
+export async function getSignatureByFile(thumbprint, file) {
+  try {
+    await cadesplugin
+    const certificate = await api.getWrappedCertificate(thumbprint)
+    const hashedData = await api.createHashedData(certificate.algorithm.value)
+    await hashedData.propset_DataEncoding(cadesplugin.CADESCOM_BASE64_TO_BINARY)
+    for (const partPromise of partialRead(file)) {
+      const part = await partPromise
+      await hashedData.Hash(part)
+    }
+
+    return await api.createDataSignatureByHash(certificate.origin, hashedData)
+    
+  } catch (error) {
+    console.error(error)
+    throw error
   }
 }

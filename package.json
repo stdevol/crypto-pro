@@ -4,6 +4,5 @@
   "license": "MIT",
   "dependencies": {   
     "cadesplugin": "github:adicom-systems/cadesplugin#v2.3.1",   
-    "lodash": "4.17.5"
     }
 }
