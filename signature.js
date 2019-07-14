@@ -1,6 +1,6 @@
 ﻿import 'cadesplugin'
 /* globals cadesplugin */
-import api from './signature-async.js'
+import api from './signature-plugin.js'
 import { partialRead } from './read-file.js'
 
 export async function getDataSignature(thumbprint, dataToSign) {
